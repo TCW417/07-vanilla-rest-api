@@ -54,7 +54,23 @@ const app = http.createServer((req, res) => {
           res.end();
           return undefined;
         }
-        
+
+        if (parsedRequest.url.pathname === '/api/cowsay') {
+          console.log(parsedRequest.url.query.text);
+          if (!parsedRequest.url.query.text || parsedRequest.url.query.text === '') {
+            res.writeHead(400, { 'Content-type': 'application/json' });
+            res.write(JSON.stringify({ error: 'invalid request: text query required' }));
+            res.end();
+            return undefined;
+          }
+          
+          const cowSays = cowsay.say({ text: parsedRequest.url.query.text });
+          res.writeHead(200, { 'Content-type': 'applicaiton/json' });
+          res.write(JSON.stringify({ content: cowSays }));
+          res.end();
+          return undefined;
+        }
+
         if (parsedRequest.url.pathname === '/api/time') {
           res.writeHead(200, { 'Content-Type': 'application/json' });
           res.write(JSON.stringify({
