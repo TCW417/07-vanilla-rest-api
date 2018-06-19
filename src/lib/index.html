@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title> cowsay </title>
+  </head>
+  <body>
+   <header>
+     <nav>
+       <ul>
+         <li><a href="/cowsay">cowsay</a></li>
+       </ul>
+     </nav>
+   <header>
+   <main>
+     <h2>Vanilla RESTfull API Server Lab</h2>
+     <p>This lab (#7) implements a simple API server. The API consists of the following routes:</p>
+     <ul>
+       <li>GET /cowsay[?text="your saying"] returns an ascii graphics cow with your saying or a random saying. Also works from a browser's address line.</li>
+       <li>GET /api/cowsay?text="your saying" returns a JSON object of the cow with your saying. Also works from a browser's address line.</li>
+       <li>GET /api/time returns a JSON object containing the current date and time.</li>
+       <li>POST /api/cowsay takes a JSON body of the form { "text": "your saying" } and returns a JSON string of the cow speaking your saying.</li>
+       <li>POST /api/echo key=value [key=value [key=value...]] returns a JSON object with the provided key: value pairs. Values with spaces should be enclosed in quotes.</li>
+     </ul>
+     </p>
+   </main>
+  </body>
+</html>
