@@ -3,6 +3,7 @@
 const http = require('http');
 const fio = require('./fileIO');
 const cowsay = require('cowsay');
+const faker = require('faker');
 const bodyParser = require('./body-parser.js');
 
 const server = module.exports = {};
@@ -31,6 +32,29 @@ const app = http.createServer((req, res) => {
           return undefined;
         }
 
+        if (parsedRequest.url.pathname === '/cowsay') {
+          let cowSays = faker.name.findName();
+          if (parsedRequest.url.query.text) {
+            cowSays = parsedRequest.url.query.text;
+          }
+          const html = `<!DOCTYPE html>
+          <html>
+            <head>
+              <title> cowsay </title>
+            </head>
+            <body>
+              <h1> Welcome to Cowsay! </h1>
+              <pre>
+                ${cowsay.say({ text: cowSays })}
+              </pre>
+            </body>
+          </html>`;
+          res.writeHead(200, { 'Content-type': 'text/html' });
+          res.write(html);
+          res.end();
+          return undefined;
+        }
+        
         if (parsedRequest.url.pathname === '/api/time') {
           res.writeHead(200, { 'Content-Type': 'application/json' });
           res.write(JSON.stringify({
