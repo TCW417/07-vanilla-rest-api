@@ -109,7 +109,7 @@ const app = http.createServer((req, res) => {
         if (parsedRequest.url.pathname === '/api/cowsay') {
           if (!parsedRequest.body.text || parsedRequest.body.text === '') {
             res.writeHead(400, { 'Content-type': 'application/json' });
-            res.write(JSON.stringify({ error: 'invalid request: non-empty text property required' }));
+            res.write(JSON.stringify({ error: 'invalid request: text query required' }));
             res.end();
             return undefined;
           }
