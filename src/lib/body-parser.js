@@ -21,15 +21,18 @@ module.exports = function bodyParser(req) {
     });
 
     req.on('end', () => {
-      try {
-        // this takes the JSON message and turns it into a JS object, and 
-        // attaches it as the "body" propery on the bigger request object
-        // possible errors: passing in ' ', usually resuls in a SyntaxError
-        req.body = JSON.parse(message);
-        return resolve(req);
-      } catch (err) {
-        return reject(err);
+      req.body = message;
+      if (message) {
+        try {
+          // this takes the JSON message and turns it into a JS object, and 
+          // attaches it as the "body" propery on the bigger request object
+          // possible errors: passing in ' ', usually resuls in a SyntaxError
+          req.body = JSON.parse(message);
+        } catch (err) {
+          return reject(err);
+        }
       }
+      return resolve(req);
     });
 
     req.on('error', err => reject(err));

@@ -2,6 +2,7 @@
 
 const http = require('http');
 const fio = require('./fileIO');
+const logger = require('./logger');
 const cowsay = require('cowsay');
 const faker = require('faker');
 const bodyParser = require('./body-parser.js');
@@ -11,22 +12,17 @@ const server = module.exports = {};
 const app = http.createServer((req, res) => {
   bodyParser(req)
     .then((parsedRequest) => {
-      console.log('parsedRequst.method:', parsedRequest.method);
-      console.log('parsedRequest.pathname:', parsedRequest.url.pathname);
-      console.log('parsedRequest.query', parsedRequest.url.query);
       if (parsedRequest.method === 'GET') {
         if (parsedRequest.url.pathname === '/') {
-          console.log('>>>>>>> GET / <<<<<<<<');
           fio.getHtmlFile(`${__dirname}/index.html`)
             .then((fileBuffer) => {
-              console.log('getHtmlFile .then fileBuffer', fileBuffer);
               res.writeHead(200, { 'Content-Type': 'text/html' });
               res.write(fileBuffer);
               res.end();
               return undefined;
             })
             .catch((err) => {
-              console.log('Error reading index.html', err);
+              logger.log(logger.ERROR, 'Error reading index.html', err);
               return undefined;
             });
           return undefined;
@@ -56,7 +52,6 @@ const app = http.createServer((req, res) => {
         }
 
         if (parsedRequest.url.pathname === '/api/cowsay') {
-          console.log(parsedRequest.url.query.text);
           if (!parsedRequest.url.query.text || parsedRequest.url.query.text === '') {
             res.writeHead(400, { 'Content-type': 'application/json' });
             res.write(JSON.stringify({ error: 'invalid request: text query required' }));
@@ -80,10 +75,6 @@ const app = http.createServer((req, res) => {
           return undefined;
         }
 
-        // this method demos what happens when you make a GET request such as:
-        // http GET :3000/api/cowsayPage?text=hello
-        // You can also do: http GET :3000/api/cowasyPage text==hello
-        // OR http :3000/api/cowsayPage text==hello because the request verb defaults to "GET"
         if (parsedRequest.url.pathname === '/api/cowsayPage') {
           // HINT for lab: because we need a parsedRequest.url.query.text, 
           // how should we handle if a user doesn't put in a "text" value? 
@@ -101,15 +92,36 @@ const app = http.createServer((req, res) => {
       // http POST :3000/api/echo name=judy hometown=seattle
       // where "name" is the key and "judy" is the value
       if (parsedRequest.method === 'POST') {
+        if (!parsedRequest.body) { // a POST without a body is an error for ever route.
+          res.writeHead(400, { 'Content-type': 'application/json' });
+          res.write(JSON.stringify({ error: 'invalid request: body required' }));
+          res.end();
+          return undefined;
+        }
+
         if (parsedRequest.url.pathname === '/api/echo') {
           res.writeHead(200, { 'Content-Type': 'application/json' });
           res.write(JSON.stringify(parsedRequest.body));
           res.end();
           return undefined;
         }
+
+        if (parsedRequest.url.pathname === '/api/cowsay') {
+          if (!parsedRequest.body.text || parsedRequest.body.text === '') {
+            res.writeHead(400, { 'Content-type': 'application/json' });
+            res.write(JSON.stringify({ error: 'invalid request: non-empty text property required' }));
+            res.end();
+            return undefined;
+          }
+          
+          const cowSays = cowsay.say({ text: parsedRequest.body.text });
+          res.writeHead(200, { 'Content-type': 'applicaiton/json' });
+          res.write(JSON.stringify({ content: cowSays }));
+          res.end();
+          return undefined;
+        }
       }
       // catch all...
-      console.log('catch all reached.  NOT FOUND!');
       res.writeHead(404, { 'Content-Type': 'text/plain' });
       res.write('NOT FOUND');
       res.end();
@@ -117,7 +129,7 @@ const app = http.createServer((req, res) => {
     })
     .catch((err) => {
       res.writeHead(400, { 'Content-Type': 'text/plain' });
-      console.log(err);
+      logger.log(logger.ERROR, `Boddy Parser threw error: ${err}`);
       res.write('BAD REQUEST');
       res.end();
       return undefined;
